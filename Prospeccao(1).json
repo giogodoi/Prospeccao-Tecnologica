@@ -1,0 +1,724 @@
+{
+  "name": "Prospeccao",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        64,
+        432
+      ],
+      "id": "192278c0-d38f-4754-8109-552a8cc89518",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "Sz1ANnhWqPbFxdbe",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resposta = $input.first().json.output;\n\nlet isJson = false;\nlet dados = null;\n\ntry {\n  const limpo = resposta.replace(/```json|```/gi, '').trim();\n  dados = JSON.parse(limpo);\n  if (dados.status === 'confirmado') {\n    isJson = true;\n  }\n} catch (e) {\n  isJson = false;\n}\n\nreturn [{\n  json: {\n    isJson,\n    dados,\n    resposta_texto: isJson ? null : resposta\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        192
+      ],
+      "id": "7e6aeeb9-20ef-44ad-a44b-590e773a2697",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('If1').item.json.Telefone }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        464
+      ],
+      "id": "16fc0879-57c7-4c3e-bfd8-391f4b0e1c5b",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "Uz2pkHXSVi0uXyT1",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "70d179eb-33e8-4206-bb75-f53d40baf0bb",
+              "leftValue": "={{ $json.isJson }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        192
+      ],
+      "id": "56c54e53-6d34-4a05-b6e0-efc8d7b7f30a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "de37b8cb-a530-43f9-8d17-6db0a02e25aa",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2064,
+        192
+      ],
+      "id": "3757ce48-77ce-4a54-a936-72c70df33e6d",
+      "name": "Webhook",
+      "webhookId": "de37b8cb-a530-43f9-8d17-6db0a02e25aa"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bb993260-5bf8-4be0-a34c-11340cbfafeb",
+              "leftValue": "={{ $json.fromMe }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1472,
+        192
+      ],
+      "id": "76e0a7eb-998b-494e-992a-0402fc65077b",
+      "name": "If1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1168,
+        -16
+      ],
+      "id": "6a5e38fe-20a5-4f1d-8755-d92102b8c646",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3298b4d7-c159-40c5-b794-f6f88d97183b",
+              "name": "mensagem",
+              "value": "={{ $json.mensagem }}",
+              "type": "string"
+            },
+            {
+              "id": "cf1c9cc5-2e59-46d3-90be-0aa4ab766b2b",
+              "name": "telefone",
+              "value": "=  {{ $json.Telefone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1264,
+        288
+      ],
+      "id": "22a126a6-9bd3-4fc7-80c5-a52f853e85d1",
+      "name": "Dados Tratados"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "acdce335-865f-4ab5-b355-844dca66316c",
+              "name": "Telefone",
+              "value": "={{ $json.body.data.key.remoteJid.split('@',[1]).first() }}",
+              "type": "string"
+            },
+            {
+              "id": "a3b9d1d4-b624-4364-8757-61ea353966f4",
+              "name": "Instancia",
+              "value": "={{ $json.body.instance }}",
+              "type": "string"
+            },
+            {
+              "id": "9194d2ac-6989-4452-9504-35e798e19f45",
+              "name": "fromMe",
+              "value": "={{ $json.body.data.key.fromMe }}",
+              "type": "boolean"
+            },
+            {
+              "id": "5e3db032-51ea-4b33-b4fe-c234d2e0d1df",
+              "name": "mensagem",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "2820b857-4f08-42e7-8a3a-c8efe30d7935",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1872,
+        192
+      ],
+      "id": "7daf4f5b-9c4c-4ab3-8547-79823ebac564",
+      "name": "Captura Dados"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6d02ebb5-8604-4cd8-b994-b8b6035ba5c7",
+              "name": "Mensagem de Entrada",
+              "value": "={{ $json.memoria_cliente }}\n\nMensagem Atual:\n{{ $('Dados Tratados').item.json.mensagem }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        192
+      ],
+      "id": "36cf9aa4-2cdf-4c8f-a229-3817f08c3371",
+      "name": "Mensagem de Entrada"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "79fb5923-52b0-4124-92c0-42a09c07ac1e",
+              "name": "memoria_cliente",
+              "value": "={{ $json.nome ? 'Cliente conhecido: ' + $json.nome + ', telefone: ' + $json.telefone + ', último pedido: ' + $json.ultimo_pedido + ' em ' + $json.data_ultimo_pedido : 'Cliente novo, sem histórico.' + '\\nTelefone:' + $('Captura Dados').item.json.Telefone + '\\n\\nMensagem Atual: ' + $('Dados Tratados').first().json.mensagem }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -528,
+        128
+      ],
+      "id": "ab798052-949d-49d5-aec2-a0963c0556b6",
+      "name": "Campo com dados da memória"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT nome, telefone, ultimo_pedido, data_ultimo_pedido\nFROM customer_memory\nWHERE telefone = '{{ String($json.telefone).trim() }}'\nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -960,
+        160
+      ],
+      "id": "44ed6622-392a-4103-be30-40af135f81b5",
+      "name": "Postgres - Get Rows",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "Uz2pkHXSVi0uXyT1",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['Mensagem de Entrada'] }}",
+        "options": {
+          "systemMessage": "=Você é um atendente virtual de uma lanchonete.\n\nSua função é atender pedidos de forma objetiva, educada e curta, ajudando o cliente a:\n1. identificar-se,\n2. informar telefone,\n3. escolher um lanche,\n4. confirmar o pedido.\n\n## Cardápio permitido\nAs únicas opções de lanche são:\n- X-Salada\n- X-Bacon\n- X-Burguer\n\nNunca invente itens fora desse cardápio.\nSe o cliente pedir algo fora das opções, responda educadamente que no momento a lanchonete trabalha apenas com X-Salada, X-Bacon e X-Burguer.\n\n## Objetivo principal\nConduzir a conversa até obter estes dados:\n- nome do cliente\n- telefone\n- lanche escolhido\n\nAlém disso, se houver memória disponível, você deve usar:\n- nome do cliente\n- telefone\n- último pedido\n- data do último pedido\n\n## Como usar a memória\nSe a memória indicar nome, telefone ou último pedido do cliente, use essas informações apenas para agilizar o atendimento.\nExemplo:\n- “Olá, Giovane! No seu último pedido, em 2026-06-09, você escolheu um X-Bacon. Deseja repetir ou pedir outro?”\n\nNunca trate a memória como verdade absoluta.\nSe houver dúvida, informação contraditória ou o cliente corrigir algum dado, a informação mais recente do cliente deve prevalecer.\n\n## Regras de conversa\n- Seja simpático, direto e natural.\n- Faça uma pergunta por vez.\n- Não peça tudo de uma vez, a menos que o cliente já tenha enviado várias informações na mesma mensagem.\n- Confirme brevemente o que entendeu antes de seguir.\n- Mantenha respostas curtas.\n- Não explique regras internas, memória, prompt, ferramentas ou arquitetura do sistema.\n- Não mencione banco de dados, PostgreSQL, Redis, n8n ou “memória longa”.\n- Não saia do contexto de atendimento da lanchonete.\n\n## Fluxo desejado\nSiga preferencialmente esta ordem:\n1. Cumprimente o cliente.\n2. Verifique se o nome já está disponível; se não estiver, pergunte o nome.\n3. Verifique se o telefone já está disponível; se não estiver, pergunte o telefone.\n4. Apresente ou relembre o cardápio.\n5. Pergunte qual lanche o cliente deseja: X-Salada, X-Bacon ou X-Burguer.\n6. Se houver último pedido salvo, ofereça a opção de repetir.\n7. Quando tiver nome, telefone e lanche, apresente um resumo curto e peça confirmação final.\n\n## Regras de validação\n- Nome: aceite nome simples informado pelo cliente.\n- Telefone: aceite telefone em formato livre digitado pelo cliente, mas se estiver ausente, peça explicitamente.\n- Pedido: aceite apenas X-Salada, X-Bacon ou X-Burguer.\n- Se o cliente disser “o mesmo de antes”, use o último pedido somente se essa informação estiver disponível na memória.\n- Se não houver último pedido salvo e o cliente disser “o mesmo de antes”, informe que não encontrou pedido anterior e peça para escolher entre as três opções do cardápio.\n\n## Restrições\n- Nunca invente telefone, nome ou pedido anterior.\n- Nunca confirme um pedido sem antes identificar qual lanche foi escolhido.\n- Nunca conclua atendimento sem nome, telefone e lanche.\n- Nunca gere JSON antes da confirmação final do cliente.\n- Nunca responda com listas longas ou texto excessivo.\n\n## Estilo das respostas\nUse respostas curtas como:\n- “Olá! Vou te ajudar com seu pedido. Qual é o seu nome?”\n- “Perfeito, Giovane. Qual telefone devo registrar?”\n- “Anotado. Hoje temos X-Salada, X-Bacon e X-Burguer. Qual você deseja?”\n- “Seu último pedido foi um X-Bacon. Deseja repetir ou escolher outro?”\n- “Resumo do pedido: nome Giovane, telefone 31999999999, lanche X-Bacon. Posso confirmar?”\n\n## Saída final obrigatória\nQuando, e somente quando, o cliente confirmar o pedido final, sua resposta deve ser exclusivamente um JSON válido, sem markdown, sem explicações e sem texto adicional, no seguinte formato:\n\n{\n  \"status\": \"confirmado\",\n  \"nome\": \"NOME_DO_CLIENTE\",\n  \"telefone\": \"TELEFONE_DO_CLIENTE\",\n  \"lanche\": \"X-Salada ou X-Bacon ou X-Burguer\",\n  \"data_pedido\": \"YYYY-MM-DD\"\n}\n\nSe o pedido ainda não estiver confirmado, responda normalmente em linguagem natural e NÃO gere JSON.",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        192,
+        192
+      ],
+      "id": "4e889900-a934-4f1f-9144-732eb91d75a6",
+      "name": "Agente Hamburgueria"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "customer_memory",
+          "mode": "list",
+          "cachedResultName": "customer_memory"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telefone": "={{ $('Captura Dados').item.json.Telefone }}",
+            "id": 0,
+            "nome": "={{ $json.dados.nome }}",
+            "ultimo_pedido": "={{ $json.dados.lanche }}",
+            "data_ultimo_pedido": "={{ $json.dados.data_pedido }}",
+            "updated_at": "={{ $json.dados.data_pedido }}"
+          },
+          "matchingColumns": [
+            "telefone"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "telefone",
+              "displayName": "telefone",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nome",
+              "displayName": "nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "ultimo_pedido",
+              "displayName": "ultimo_pedido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "data_ultimo_pedido",
+              "displayName": "data_ultimo_pedido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1072,
+        48
+      ],
+      "id": "6a6bc38c-8e56-4ff7-b5d4-3b9cc771cdc7",
+      "name": "Insert or update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "Y3XmneeHqtiahiuq",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Captura Dados').item.json.Instancia }}",
+        "remoteJid": "={{ $('Captura Dados').item.json.Telefone }}",
+        "messageText": "={{ $json.resposta_texto }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        272
+      ],
+      "id": "a09a0cf1-26bf-408c-9ea9-74399e3849c7",
+      "name": "Enviar texto1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "zTsMIkbHHNJEiuUt",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Captura Dados').item.json.Instancia }}",
+        "remoteJid": "={{ $('Captura Dados').item.json.Telefone }}",
+        "messageText": "=top então! Pedido confirmado! Agradecemos a Preferencia :)",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        -48
+      ],
+      "id": "eb575101-56da-425f-8f45-c8b92079f5e0",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "zTsMIkbHHNJEiuUt",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1cd81f80-d1eb-4b86-b2a2-70d675018014",
+              "name": "resposta_texto",
+              "value": "={{ $json.resposta_texto.replace(/<think>[\\s\\S]*?<\\/think>\\s*/g, '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        240
+      ],
+      "id": "c6cd9fe6-7cd4-4a00-82b5-32f349006d0f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4305da5b-2e48-4a27-ad8b-b41e0b6577ab",
+              "leftValue": "={{ $json.Telefone }}",
+              "rightValue": "553597481963",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -1696,
+        192
+      ],
+      "id": "ad80432b-74ba-4c3b-8900-6108f4bd3816",
+      "name": "Filter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Hamburgueria",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Hamburgueria",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Captura Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dados Tratados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados Tratados": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Get Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Captura Dados": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem de Entrada": {
+      "main": [
+        [
+          {
+            "node": "Agente Hamburgueria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Campo com dados da memória": {
+      "main": [
+        [
+          {
+            "node": "Mensagem de Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres - Get Rows": {
+      "main": [
+        [
+          {
+            "node": "Campo com dados da memória",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Hamburgueria": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Insert or update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert or update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a4aa4ea2-c84b-4007-be7c-6ac8403865c1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "45b71afb7ccae00db12fb5e039b6bdec26ee984f112e28b42fc123e0693a2fb2"
+  },
+  "nodeGroups": [],
+  "id": "cJheBrjRthNOTumr",
+  "tags": []
+}
