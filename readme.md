@@ -4,7 +4,8 @@
 
 Este projeto apresenta uma solução de automação conversacional voltada ao atendimento de pedidos em uma lanchonete, com foco na implementação de memória longa estruturada por cliente. A proposta integra orquestração de fluxos, persistência de dados e interação via WhatsApp, de modo a possibilitar um atendimento mais contextualizado, consistente e reproduzível.
 
-<strong>Acesse o vídeo de explicação e demonstração aqui!</strong>
+
+[<strong>Acesse o vídeo de explicação e demonstração aqui!</strong>](https://youtu.be/1BL4K4YV3S8)
 
 A solução foi desenvolvida com uma arquitetura baseada em serviços, utilizando n8n como orquestrador do fluxo conversacional, PostgreSQL como banco relacional para persistência da memória, Redis como suporte de fila e cache, e Evolution API como camada de integração com a plataforma de mensagens.
 
@@ -136,6 +137,15 @@ Para carregar o fluxo principal no n8n:
 4. Escolher o arquivo `Prospeccao-1.json`.
 5. Salvar o workflow importado.
 6. Ajustar credenciais e ativar o fluxo.
+
+<Strong>Certifique de instalar tambem o nó do EvolutionAPI na sessao de Community Nodes</Strong>
+
+<img width="549" height="687" alt="image" src="https://github.com/user-attachments/assets/8bcda1c1-b768-4b7d-81af-fc04065d9b4f" />
+
+<img width="1767" height="573" alt="image" src="https://github.com/user-attachments/assets/831fb1e6-553e-4e38-bf38-35e3497e660b" />
+
+<img width="1096" height="815" alt="image" src="https://github.com/user-attachments/assets/e33797f9-4cbb-4aa0-98bd-905aeac7a030" />
+
 
 ## 11. Configuração dos bancos
 
